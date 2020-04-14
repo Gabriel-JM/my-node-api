@@ -16,7 +16,8 @@ export default abstract class Controller extends EventEmitter {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
         'Access-Control-Allow-Headers': '*',
-        'Access-Control-Max-Age': 2592000000
+        'Access-Control-Max-Age': 2592000000,
+        'Content-Type': 'application/json'
     }
 
     constructor(
@@ -92,12 +93,38 @@ export default abstract class Controller extends EventEmitter {
         )
     }
 
-    put() {
+    async put() {
+        const { body = null } = this.content
 
+        if(body && body.id) {
+            const result = await this.service?.putOne(body)
+
+            this.ok()
+            this.res.end(JSON.stringify(result))
+        }
+
+        this.badRequest()
+        this.res.end(
+            this.sendMessage('Request Body must have an ID.', false)
+        )
     }
 
-    delete() {
+    async delete() {
+        const { id } = this.content.query
 
+        if(id) {
+            const result = await this.service?.deleteOne(
+                Number(id)
+            )
+
+            this.ok()
+            this.res.end(JSON.stringify(result))
+        }
+
+        this.badRequest()
+        this.res.end(
+            this.sendMessage('Request Query must have an ID', false)
+        )
     }
 
     ok() {

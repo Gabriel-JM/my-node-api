@@ -1,4 +1,5 @@
 import Dolphin from '../../database/Dolphin'
+import { BodyContent } from '../types/interfaces'
 
 export default abstract class Service {
     
@@ -40,14 +41,14 @@ export default abstract class Service {
         }
     }
 
-    async postOne(contentBody: object): Promise<any> {
+    async postOne(contentBody: BodyContent): Promise<any> {
         return await this.defaultPostOne(contentBody)
     }
 
-    protected async defaultPostOne(contentBody: object) {
+    protected async defaultPostOne(contentBody: BodyContent) {
         try {
             const result = await this.dolphin.insert({
-                values: Object.values(contentBody)
+                values: Object.values(contentBody as object)
             })
 
             return result
@@ -57,14 +58,14 @@ export default abstract class Service {
         }
     }
 
-    async putOne(contentBody: object): Promise<any> {
+    async putOne(contentBody: BodyContent): Promise<any> {
         return await this.defaultPutOne(contentBody as { id: number })
     }
 
     protected async defaultPutOne(contentBody: { id: number }) {
         try {
             const result = await this.dolphin.update({
-                values: contentBody,
+                values: contentBody as object,
                 where: ['id', contentBody.id]
             })
 
@@ -82,6 +83,8 @@ export default abstract class Service {
     protected async defaultDeleteOne(id: number) {
         try {
             const result = await this.dolphin.delete(id)
+
+            return result
         } catch(err) {
             console.error(err)
             return null

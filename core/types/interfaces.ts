@@ -8,5 +8,7 @@ export interface RequestContent {
     query: ParsedUrlQuery
     pathname: string | null
     pathArray: string[]
-    body: object | null
+    body: BodyContent
 }
+
+export type BodyContent = { id?: number } | null
