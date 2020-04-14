@@ -41,7 +41,51 @@ export default abstract class Service {
     }
 
     async postOne(contentBody: object): Promise<any> {
-        return null
+        return await this.defaultPostOne(contentBody)
+    }
+
+    protected async defaultPostOne(contentBody: object) {
+        try {
+            const result = await this.dolphin.insert({
+                values: Object.values(contentBody)
+            })
+
+            return result
+        } catch(err) {
+            console.error(err)
+            return null
+        }
+    }
+
+    async putOne(contentBody: object): Promise<any> {
+        return await this.defaultPutOne(contentBody as { id: number })
+    }
+
+    protected async defaultPutOne(contentBody: { id: number }) {
+        try {
+            const result = await this.dolphin.update({
+                values: contentBody,
+                where: ['id', contentBody.id]
+            })
+
+            return result
+        } catch(err) {
+            console.error(err)
+            return null
+        }
+    }
+
+    async deleteOne(id: number): Promise<any> {
+        return await this.defaultDeleteOne(id)
+    }
+
+    protected async defaultDeleteOne(id: number) {
+        try {
+            const result = await this.dolphin.delete(id)
+        } catch(err) {
+            console.error(err)
+            return null
+        }
     }
 
 }
