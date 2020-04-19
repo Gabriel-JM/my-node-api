@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'fs'
+import path from 'path'
 import StringParser from '../StringParser/StringParser'
 
 const stringParser = new StringParser()
@@ -15,7 +15,7 @@ export default function build(mainFolderPath: string) {
         return buildImports(dirs, controllers)
     } catch(error) {
         console.log('\nbuild function: Folder not found\n\n', error)
-        return null
+        return {} as object
     }
 }
 

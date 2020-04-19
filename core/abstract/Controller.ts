@@ -13,16 +13,14 @@ export default abstract class Controller extends EventEmitter {
     protected res: http.ServerResponse
     protected req: http.IncomingMessage
     protected headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
-        'Access-Control-Allow-Headers': '*',
-        'Access-Control-Max-Age': 2592000000,
         'Content-Type': 'application/json'
     }
 
+    abstract postObject() : void
+
     constructor(
         protected content: RequestContent,
-        protected service?: Service
+        protected service: Service
     ) {
         super()
         this.res = content.res
@@ -68,63 +66,57 @@ export default abstract class Controller extends EventEmitter {
 
         if(id) {
             const numberId = Number(id)
-            result = await this.service?.getOne(numberId)
+            result = await this.service.getOne(numberId)
         }
 
-        result = await this.service?.getAll()
+        result = await this.service.getAll()
 
         this.ok()
-        this.res.end(JSON.stringify(result))
+        this.sendResponse(result)
     }
 
     async post() {
         const { body = null } = this.content
 
         if(body) {
-            const result = await this.service?.postOne(body)
+            const result = await this.service.postOne(body)
 
             this.ok()
-            this.res.end(JSON.stringify(result))
+            this.sendResponse(result)
         }
 
         this.badRequest()
-        this.res.end(
-            this.sendMessage('Request Body not found.', false)
-        )
+        this.sendMessage('Request Body not found.', false)
     }
 
     async put() {
         const { body = null } = this.content
 
         if(body && body.id) {
-            const result = await this.service?.putOne(body)
+            const result = await this.service.putOne(body)
 
             this.ok()
-            this.res.end(JSON.stringify(result))
+            this.sendResponse(result)
         }
 
         this.badRequest()
-        this.res.end(
-            this.sendMessage('Request Body must have an ID.', false)
-        )
+        this.sendMessage('Request Body must have an ID.', false)
     }
 
     async delete() {
         const { id } = this.content.query
 
         if(id) {
-            const result = await this.service?.deleteOne(
+            const result = await this.service.deleteOne(
                 Number(id)
             )
 
             this.ok()
-            this.res.end(JSON.stringify(result))
+            this.sendResponse(result)
         }
 
         this.badRequest()
-        this.res.end(
-            this.sendMessage('Request Query must have an ID', false)
-        )
+        this.sendMessage('Request Query must have an ID', false)
     }
 
     ok() {
@@ -132,7 +124,15 @@ export default abstract class Controller extends EventEmitter {
     }
 
     options() {
-        this.res.writeHead(204, this.headers)
+        const headers = {
+            ...this.headers,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Max-Age': 2592000000
+        }
+
+        this.res.writeHead(204, headers)
         this.res.end()
     }
 
@@ -155,15 +155,20 @@ export default abstract class Controller extends EventEmitter {
         )
     }
 
+    sendResponse(responseContent: object) {
+        this.res.end(JSON.stringify(responseContent))
+    }
+
     sendMessage(message: string, status: boolean) {
-        return JSON.stringify({
+        const jsonMessage = JSON.stringify({
             message,
             ok: status
         })
+
+        this.res.end(jsonMessage)
     }
 
-    start() {
+    init() {
         this.emit(this.verifyMethod())
     }
-
 }

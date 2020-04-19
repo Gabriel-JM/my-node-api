@@ -2,6 +2,7 @@ import * as http from 'http'
 import * as Url from 'url'
 import { RequestContent } from './core/types/interfaces'
 import appRouter from './app/appRouter'
+import insertTables from './database/utils/insertTables'
 
 const port = 3200
 
@@ -31,7 +32,10 @@ const server = http.createServer(
     }
 )
 
-server.listen(port, () => console.log('Server working... Port: '+port))
+server.listen(port, () => {
+    console.log('Server working... Port: '+port)
+    insertTables()
+})
 
 function getBodyContent(req : http.IncomingMessage): Promise<object | null> {
     return new Promise((resolve, reject) => {

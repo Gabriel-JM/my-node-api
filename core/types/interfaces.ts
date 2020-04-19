@@ -11,4 +11,8 @@ export interface RequestContent {
     body: BodyContent
 }
 
+export interface stringKeyAccess {
+    [key: string]: any
+}
+
 export type BodyContent = { id?: number } | null
