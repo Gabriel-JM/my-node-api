@@ -78,4 +78,20 @@ export default class QueryStringBuilder {
 
         return keys
     }
+
+    updateValuesString(obj: object) {
+        const entries = Object.entries(obj)
+        let finalString = ''
+
+        entries.forEach((entry, index) => {
+            const [key, value] = entry
+            if(index) {
+                finalString += `, ${key} = ${value}`
+            } else {
+                finalString += `${key} = ${value}`
+            }
+        })
+
+        return finalString
+    }
 }

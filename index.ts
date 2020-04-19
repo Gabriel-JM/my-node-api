@@ -1,7 +1,7 @@
 import * as http from 'http'
 import * as Url from 'url'
 import { RequestContent } from './core/types/interfaces'
-import AppRouter from './app/AppRouter'
+import appRouter from './app/appRouter'
 
 const port = 3200
 
@@ -22,7 +22,7 @@ const server = http.createServer(
                 body
             }
 
-            new AppRouter(content)
+            appRouter(content)
         } catch(err) {
             console.error('There is an error: ',err)
             res.writeHead(400)

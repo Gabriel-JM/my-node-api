@@ -5,6 +5,20 @@ export default class StringParser {
         return firstLetterUp + string.slice(1)
     }
 
+    private recreateWordAfterMatch(original: string, match: RegExpMatchArray) {
+        let array = original.split(match[0])
+
+        array = array.map(string => {
+            if(array.indexOf(string)) {
+                string = match[0].toLowerCase() + string
+            }
+
+            return string
+        })
+
+        return array
+    }
+
     createEventName(method: string, pathArray: string[]) {
         let newEventName = method
 
@@ -20,6 +34,17 @@ export default class StringParser {
         }
 
         return newEventName
+    }
+
+    pascalCaseToDashCase(text: string): string {
+        const match = text.match(/(?<=[a-z])[A-Z]/)
+
+        if(!match) return text.toLowerCase()
+
+        const stringArray = this.recreateWordAfterMatch(text, match)
+        const newText = stringArray.join('-')
+
+        return this.pascalCaseToDashCase(newText)
     }
 
 }

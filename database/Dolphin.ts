@@ -12,7 +12,7 @@ export default class Dolphin {
     async selectAll() {
         const query = `SELECT * FROM ${this.table};`
 
-        return await this.execQuery(query)
+        return this.execQuery(query)
     }
 
     async select(queryConfig: QueryObject) {
@@ -35,7 +35,7 @@ export default class Dolphin {
 
         query += ';'
 
-        return await this.execQuery(query)
+        return this.execQuery(query)
     }
 
     async insert(insertValues: ValuesInsert) {
@@ -47,42 +47,25 @@ export default class Dolphin {
 
         const query = this.queryBuilder[method](this.table, values)
 
-        return await this.execQuery(query, values as [])
+        return this.execQuery(query, values as [])
     }
 
     async update(updateObj: ValuesUpdate) {
         const { values, where } = updateObj
-        const stringValue = this.updatePairString(values)
-        const [toBeCompared, valueToCompare] = where
+        const stringValue = this.queryBuilder.updateValuesString(values)
+        const whereString = this.queryBuilder.createWhereQuery(where)
 
         const query = (`
-            UPDATE ${this.table} SET ${stringValue} 
-            WHERE ${toBeCompared} = ${valueToCompare};
+            UPDATE ${this.table} SET ${stringValue}${whereString};
         `)
 
-        return await this.execQuery(query)
-    }
-
-    private updatePairString(obj: object) {
-        const entries = Object.entries(obj)
-        let finalString = ''
-
-        entries.forEach((entry, index) => {
-            const [key, value] = entry
-            if(index) {
-                finalString += `, ${key} = ${value}`
-            } else {
-                finalString += `${key} = ${value}`
-            }
-        })
-
-        return finalString
+        return this.execQuery(query)
     }
 
     async delete(id: number) {
         const query = `DELETE FROM ${this.table} WHERE id = ?`
 
-        return await this.execQuery(query, [id])
+        return this.execQuery(query, [id])
     }
 
     private async execQuery(query: string, values?: any[]) {

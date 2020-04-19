@@ -1,15 +1,13 @@
+import * as path from 'path'
 import { RequestContent } from '../core/types/interfaces'
+import ImportsBuilder from '../core/ImportsBuilder/ImportsBuilder'
 
-export default class AppRouter {
+const srcPath = path.join(__dirname, 'src')
 
-    constructor(private content: RequestContent) {
-        this.run()
-    }
+export default function appRouter(content: RequestContent) {
+    const { res, pathArray } = content
+    const result = ImportsBuilder(srcPath)
+    console.log(result)
 
-    private run() {
-        const { res } = this.content
-
-        res.end(JSON.stringify({ message: 'hi' }))
-    }
-
+    res.end(JSON.stringify('hi'))
 }
