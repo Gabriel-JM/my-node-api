@@ -1,50 +1,50 @@
 export default class StringParser {
 
-    private captalize(string: string) {
-        const firstLetterUp = string.charAt(0).toUpperCase()
-        return firstLetterUp + string.slice(1)
-    }
+  private captalize(string: string) {
+    const firstLetterUp = string.charAt(0).toUpperCase()
+    return firstLetterUp + string.slice(1)
+  }
 
-    private recreateWordAfterMatch(original: string, match: RegExpMatchArray) {
-        let array = original.split(match[0])
+  private recreateSplitedWord(original: string, match: RegExpMatchArray) {
+    let array = original.split(match[0])
 
-        array = array.map(string => {
-            if(array.indexOf(string)) {
-                string = match[0].toLowerCase() + string
-            }
+    array = array.map(string => {
+      if(array.indexOf(string)) {
+        string = match[0].toLowerCase() + string
+      }
 
-            return string
-        })
+      return string
+    })
 
-        return array
-    }
+    return array
+  }
 
-    createEventName(method: string, pathArray: string[]) {
-        let newEventName = method
+  createEventName(method: string, pathArray: string[]) {
+    let newEventName = method
 
-        if(pathArray[1]) {
-            const arrayCopy = pathArray.slice(1)
-            arrayCopy.forEach(path => {
-                if(path) {
-                    const newName = this.captalize(path)
+    if(pathArray[1]) {
+      const arrayCopy = pathArray.slice(1)
+      arrayCopy.forEach(path => {
+        if(path) {
+          const newName = this.captalize(path)
 
-                    newEventName += `By${newName}`
-                }
-            })
+          newEventName += `By${newName}`
         }
-
-        return newEventName
+      })
     }
 
-    pascalCaseToDashCase(text: string): string {
-        const match = text.match(/(?<=[a-z])[A-Z]/)
+    return newEventName
+  }
 
-        if(!match) return text.toLowerCase()
+  pascalCaseToDashCase(text: string): string {
+    const match = text.match(/(?<=[a-z])[A-Z]/)
 
-        const stringArray = this.recreateWordAfterMatch(text, match)
-        const newText = stringArray.join('-')
+    if(!match) return text.toLowerCase()
 
-        return this.pascalCaseToDashCase(newText)
-    }
+    const stringArray = this.recreateSplitedWord(text, match)
+    const newText = stringArray.join('-')
+
+    return this.pascalCaseToDashCase(newText)
+  }
 
 }

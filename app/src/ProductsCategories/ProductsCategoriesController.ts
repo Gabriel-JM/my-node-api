@@ -6,15 +6,15 @@ const service = new ProductsCategoriesService()
 
 class ProductsCategoriesController extends Controller {
 
-    constructor(protected content: RequestContent) {
-        super(content, service)
-    }
+  constructor(protected content: RequestContent) {
+    super(content, service)
+  }
 
-    postObject() {
-        const { name, color }: any = this.content.body
+  postObject() {
+    const { ...body }: any = this.content
 
-        return { name, color }
-    }
+    return { name: body.name, color: body.color }
+  }
 
 }
 

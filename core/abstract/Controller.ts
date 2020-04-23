@@ -8,171 +8,171 @@ const stringParser = new StringParser()
 const eventNames = ['get', 'post', 'put', 'delete', 'options']
 
 export default abstract class Controller extends EventEmitter {
-    [key: string]: any
-    protected event = ''
-    protected res: http.ServerResponse
-    protected req: http.IncomingMessage
-    protected headers = {
-        'Content-Type': 'application/json'
-    }
+  [key: string]: any
+  protected event = ''
+  protected res: http.ServerResponse
+  protected req: http.IncomingMessage
+  protected headers = {
+    'Content-Type': 'application/json'
+  }
 
-    abstract postObject() : void
+  abstract postObject() : void
 
-    constructor(
-        protected content: RequestContent,
-        protected service: Service
-    ) {
-        super()
-        this.res = content.res
-        this.req = content.req
-        this.createEvents()
-    }
+  constructor(
+    protected content: RequestContent,
+    protected service: Service
+  ) {
+    super()
+    this.res = content.res
+    this.req = content.req
+    this.createEvents()
+  }
 
-    private createEvents() {
-        this.generateEventsNames()
+  private createEvents() {
+    this.generateEventsNames()
 
-        eventNames.forEach(event => {
-            this.on(event, () => {
-                const hasEvent = event in this
-                if(!hasEvent) {
-                    this.notFound()
-                    this.res.end()
-                    throw console.error('Event not found')
-                }
-
-                this[event]()
-            })
-        })
-    }
-
-    private generateEventsNames() {
-        const { pathArray, method } = this.content
-        this.event = stringParser.createEventName(method, pathArray)
-
-        if(!eventNames.includes(this.event)) {
-            eventNames.push(this.event)
-        }
-    }
-
-    private verifyMethod() {
-        const hasEventMethod = eventNames.includes(this.event)
-
-        return hasEventMethod ? this.event : 'default'
-    }
-
-    async get() {
-        let { id = null } = this.content.query
-        let result: {} | []
-
-        if(id) {
-            const numberId = Number(id)
-            result = await this.service.getOne(numberId)
+    eventNames.forEach(event => {
+      this.on(event, () => {
+        const hasEvent = event in this
+        if(!hasEvent) {
+          this.notFound()
+          this.res.end()
+          throw console.error('Event not found')
         }
 
-        result = await this.service.getAll()
+        this[event]()
+      })
+    })
+  }
 
-        this.ok()
-        this.sendResponse(result)
+  private generateEventsNames() {
+    const { pathArray, method } = this.content
+    this.event = stringParser.createEventName(method, pathArray)
+
+    if(!eventNames.includes(this.event)) {
+      eventNames.push(this.event)
+    }
+  }
+
+  private verifyMethod() {
+    const hasEventMethod = eventNames.includes(this.event)
+
+    return hasEventMethod ? this.event : 'default'
+  }
+
+  async get() {
+    let { id = null } = this.content.query
+    let result: {} | []
+
+    if(id) {
+      const numberId = Number(id)
+      result = await this.service.getOne(numberId)
     }
 
-    async post() {
-        const { body = null } = this.content
+    result = await this.service.getAll()
 
-        if(body) {
-            const result = await this.service.postOne(body)
+    this.ok()
+    this.sendResponse(result)
+  }
 
-            this.ok()
-            this.sendResponse(result)
-        }
+  async post() {
+    const { body = null } = this.content
 
+    if(body) {
+      const result = await this.service.postOne(body)
+
+      this.ok()
+      this.sendResponse(result)
+    }
+
+    this.badRequest()
+    this.sendMessage('Request Body not found.', false)
+  }
+
+  async put() {
+    const { body = null } = this.content
+
+    if(body && (body as BodyContent).id) {
+      const result = await this.service.putOne(body as BodyContent)
+
+      if(result) {
         this.badRequest()
-        this.sendMessage('Request Body not found.', false)
+        this.sendMessage('Failed on update!', false)
+      }
+
+      this.ok()
+      this.sendResponse(result)
     }
 
-    async put() {
-        const { body = null } = this.content
+    this.badRequest()
+    this.sendMessage('Request Body must have an ID.', false)
+  }
 
-        if(body && (body as BodyContent).id) {
-            const result = await this.service.putOne(body as BodyContent)
+  async delete() {
+    const { id } = this.content.query
 
-            if(result) {
-                this.badRequest()
-                this.sendMessage('Failed on update!', false)
-            }
+    if(id) {
+      const result = await this.service.deleteOne(
+          Number(id)
+      )
 
-            this.ok()
-            this.sendResponse(result)
-        }
-
-        this.badRequest()
-        this.sendMessage('Request Body must have an ID.', false)
+      result.ok ? this.ok() : this.notFound()
+      this.sendResponse(result)
     }
 
-    async delete() {
-        const { id } = this.content.query
+    this.badRequest()
+    this.sendMessage('Request Query must have an ID', false)
+  }
 
-        if(id) {
-            const result = await this.service.deleteOne(
-                Number(id)
-            )
+  ok() {
+    this.res.writeHead(200, this.headers)
+  }
 
-            result.ok ? this.ok() : this.notFound()
-            this.sendResponse(result)
-        }
-
-        this.badRequest()
-        this.sendMessage('Request Query must have an ID', false)
+  options() {
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': 2592000000
     }
 
-    ok() {
-        this.res.writeHead(200, this.headers)
-    }
+    this.res.writeHead(204, headers)
+    this.res.end()
+  }
 
-    options() {
-        const headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Max-Age': 2592000000
-        }
+  badRequest() {
+    this.res.writeHead(400, this.headers)
+  }
 
-        this.res.writeHead(204, headers)
-        this.res.end()
-    }
+  notFound() {
+    this.res.writeHead(404, this.headers)
+  }
 
-    badRequest() {
-        this.res.writeHead(400, this.headers)
-    }
+  notAllowed() {
+    this.res.writeHead(405, this.headers)
+  }
 
-    notFound() {
-        this.res.writeHead(404, this.headers)
-    }
+  default() {
+    this.notAllowed()
+    this.res.end(
+      this.sendMessage('Method not allowed', false)
+    )
+  }
 
-    notAllowed() {
-        this.res.writeHead(405, this.headers)
-    }
+  sendResponse(responseContent: object) {
+    this.res.end(JSON.stringify(responseContent))
+  }
 
-    default() {
-        this.notAllowed()
-        this.res.end(
-            this.sendMessage('Method not allowed', false)
-        )
-    }
+  sendMessage(message: string, status: boolean) {
+    const jsonMessage = JSON.stringify({
+      message,
+      ok: status
+    })
 
-    sendResponse(responseContent: object) {
-        this.res.end(JSON.stringify(responseContent))
-    }
+    this.res.end(jsonMessage)
+  }
 
-    sendMessage(message: string, status: boolean) {
-        const jsonMessage = JSON.stringify({
-            message,
-            ok: status
-        })
-
-        this.res.end(jsonMessage)
-    }
-
-    init() {
-        this.emit(this.verifyMethod())
-    }
+  init() {
+    this.emit(this.verifyMethod())
+  }
 }
