@@ -1,6 +1,6 @@
 import * as http from 'http'
 import { EventEmitter } from 'events'
-import { RequestContent } from '../types/interfaces'
+import { RequestContent, BodyContent } from '../types/interfaces'
 import StringParser from '../StringParser/StringParser'
 import Service from './Service'
 
@@ -92,8 +92,13 @@ export default abstract class Controller extends EventEmitter {
     async put() {
         const { body = null } = this.content
 
-        if(body && body.id) {
-            const result = await this.service.putOne(body)
+        if(body && (body as BodyContent).id) {
+            const result = await this.service.putOne(body as BodyContent)
+
+            if(result) {
+                this.badRequest()
+                this.sendMessage('Failed on update!', false)
+            }
 
             this.ok()
             this.sendResponse(result)
@@ -111,7 +116,7 @@ export default abstract class Controller extends EventEmitter {
                 Number(id)
             )
 
-            this.ok()
+            result.ok ? this.ok() : this.notFound()
             this.sendResponse(result)
         }
 
@@ -125,7 +130,6 @@ export default abstract class Controller extends EventEmitter {
 
     options() {
         const headers = {
-            ...this.headers,
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS, GET, POST, PUT, DELETE',
             'Access-Control-Allow-Headers': '*',

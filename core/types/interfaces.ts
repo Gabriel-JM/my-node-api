@@ -8,11 +8,11 @@ export interface RequestContent {
     query: ParsedUrlQuery
     pathname: string | null
     pathArray: string[]
-    body: BodyContent
+    body: BodyContent | object
 }
 
 export interface stringKeyAccess {
     [key: string]: any
 }
 
-export type BodyContent = { id?: number } | null
+export type BodyContent = { id: number }

@@ -15,9 +15,9 @@ export default abstract class Service {
 
     protected async defaultGetAll() {
         try {
-            const allItems = await this.dolphin.selectAll()
+            const {rows}: any = await this.dolphin.selectAll()
 
-            return allItems
+            return rows
         } catch(err) {
             console.error(err)
             return null
@@ -30,28 +30,29 @@ export default abstract class Service {
 
     protected async defaultGetOne(id: number) {
         try {
-            const item = await this.dolphin.select({
+            const {rows}: any = await this.dolphin.select({
+                values: '*',
                 where: ['id', id]
             })
 
-            return item
+            return rows[0]
         } catch(err) {
             console.error(err)
             return null
         }
     }
 
-    async postOne(contentBody: BodyContent): Promise<any> {
+    async postOne(contentBody: object): Promise<any> {
         return await this.defaultPostOne(contentBody)
     }
 
-    protected async defaultPostOne(contentBody: BodyContent) {
+    protected async defaultPostOne(contentBody: object) {
         try {
-            const result = await this.dolphin.insert({
+            const {rows}: any = await this.dolphin.insert({
                 values: Object.values(contentBody as object)
             })
 
-            return result
+            return this.defaultGetOne(rows.insertId)
         } catch(err) {
             console.error(err)
             return null
@@ -64,12 +65,15 @@ export default abstract class Service {
 
     protected async defaultPutOne(contentBody: { id: number }) {
         try {
-            const result = await this.dolphin.update({
+            const {rows}: any = await this.dolphin.update({
                 values: contentBody as object,
                 where: ['id', contentBody.id]
             })
 
-            return result
+            return (
+                rows.affectedRows ?
+                    this.defaultGetOne(contentBody.id) : null
+            )
         } catch(err) {
             console.error(err)
             return null
@@ -82,9 +86,21 @@ export default abstract class Service {
 
     protected async defaultDeleteOne(id: number) {
         try {
-            const result = await this.dolphin.delete(id)
+            const {rows} : any = await this.dolphin.delete(id)
 
-            return result
+            if(rows.affectedRows) {
+                return {
+                    message: 'Successful delete!',
+                    objectId: id,
+                    ok: true
+                }
+            }
+
+            return {
+                message: 'Not found ID!',
+                objectId: id,
+                ok: false
+            }
         } catch(err) {
             console.error(err)
             return null

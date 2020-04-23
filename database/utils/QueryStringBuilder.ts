@@ -38,8 +38,11 @@ export default class QueryStringBuilder {
 
     insertFromArrayValues(table: string, values: any[]) {
         if(values.length) {
-            const query = `INSERT INTO ${table} VALUES(?);`
+            const questionMarks = values.reduce(acc => {
+                return acc + ', ?'
+            }, '')
 
+            const query = `INSERT INTO ${table} VALUES(default${questionMarks});`
             return query
         }
 
@@ -47,13 +50,17 @@ export default class QueryStringBuilder {
     }
 
     insertFromObject(table: string, value: object) {
+        value = this.preventNoIdKey(value)
         const objKeys = Object.keys(value)
         const values = Object.values(value)
 
         if(values.length) {
             const keys = this.createKeysString(objKeys)
+            const questionMarks = values.reduce(acc => {
+                return acc ? acc + ', ?' : acc + '?'
+            }, '')
     
-            const query = `INSERT INTO ${table}(${keys}) VALUES(?);`
+            const query = `INSERT INTO ${table}(${keys}) VALUES(${questionMarks});`
     
             return query
         }
@@ -61,36 +68,41 @@ export default class QueryStringBuilder {
         return ''
     }
 
-    private createKeysString(objKeys: string[]) {
-        let keys = ''
-
-        if(objKeys.length) {
-            objKeys.forEach((entry, index) => {
-                const [key] = entry
-
-                if(index) {
-                    keys += `, ${key}`
-                } else {
-                    keys += key
-                }
-            })
+    private preventNoIdKey(obj: object): object {
+        if(!('id' in obj)) {
+            Object.assign(obj, { id: 'default' })
         }
 
-        return keys
+        return obj
+    }
+
+    private createKeysString(objKeys: string[]) {
+        if(objKeys.length) {
+            const keys = objKeys.reduce((acc, entry, index) => {
+                if(index) {
+                    return acc + `, ${entry}`
+                } else {
+                    return acc + entry
+                }
+            }, '')
+
+            return keys
+        }
+
+        return ''
     }
 
     updateValuesString(obj: object) {
         const entries = Object.entries(obj)
-        let finalString = ''
 
-        entries.forEach((entry, index) => {
+        const finalString = entries.reduce((acc, entry, index) => {
             const [key, value] = entry
             if(index) {
-                finalString += `, ${key} = ${value}`
+                return acc + `, ${key} = '${value}'`
             } else {
-                finalString += `${key} = ${value}`
+                return acc + `${key} = '${value}'`
             }
-        })
+        }, '')
 
         return finalString
     }

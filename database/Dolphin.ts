@@ -39,13 +39,15 @@ export default class Dolphin {
     }
 
     async insert(insertValues: ValuesInsert) {
-        const { values } = insertValues
+        let { values } = insertValues
         const isArray = Array.isArray(values)
         let method = (
             isArray ? 'insertFromArrayValues' : 'insertFromObject'
         )
 
         const query = this.queryBuilder[method](this.table, values)
+
+        values = isArray ? values : Object.values(values)
 
         return this.execQuery(query, values as [])
     }
@@ -68,7 +70,7 @@ export default class Dolphin {
         return this.execQuery(query, [id])
     }
 
-    private async execQuery(query: string, values?: any[]) {
+    private async execQuery(query: string, values: any[] = []) {
         try {
             const [rows, fields] = await this.conn.execute(query, values)
 
