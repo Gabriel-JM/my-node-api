@@ -8,12 +8,42 @@ class RequestValidator {
 
   validate(requestContent: stringKeyAccess) {
     const modelKeys = Object.keys(this.model)
+    const requestKeys = Object.keys(requestContent)
+
     const requiredKeys = modelKeys.filter(key => {
       const optional = this.model[key].optional || false
       return optional == false
     })
 
-    console.log('timeFormat:', this.timeFormat('32:00'))
+    const validateRequestKeys = requiredKeys.every(key => {
+      return requestKeys.includes(key)
+    })
+    
+    if(!validateRequestKeys) {
+      return {
+        message: 'Request don\'t obey to the model requirement.',
+        valid: false
+      }
+    }
+
+    if(this.getLength(modelKeys) < this.getLength(requestKeys)) {
+      return {
+        message: 'Request has more properties then model.',
+        valid: false
+      }
+    }
+
+    const validationObj = modelKeys.reduce((acc, key) => {
+      return {...acc, [key]: Object.keys(this.model[key])}
+    }, {} as stringKeyAccess)
+
+    Object.keys(validationObj).forEach(key => {
+      validationObj[key].forEach((toValidate: string) => {
+        console.log(key, toValidate, toValidate in this)
+      })
+    })
+
+    return true
   }
 
   private type(expected: string, value: any) {

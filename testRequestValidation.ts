@@ -9,7 +9,7 @@ const model = {
   color: {
     type: 'string',
     length: 7,
-    optional: true
+    optional: false
   }
 }
 
@@ -20,4 +20,6 @@ const request = {
 
 const requestValidator = new RequestValidator(model)
 
-requestValidator.validate(request)
+const result = requestValidator.validate(request)
+
+console.log(result)
