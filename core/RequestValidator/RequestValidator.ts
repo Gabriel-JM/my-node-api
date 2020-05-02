@@ -3,56 +3,77 @@ import { stringKeyAccess } from "../types/interfaces"
 class RequestValidator {
 
   [key: string]: any
+  modelKeys: string[]
 
-  constructor(private model: stringKeyAccess) {}
+  constructor(private model: stringKeyAccess) {
+    this.modelKeys = Object.keys(this.model)
+  }
 
   validate(requestContent: stringKeyAccess) {
-    const modelKeys = Object.keys(this.model)
-    const requestKeys = Object.keys(requestContent)
+    this.requestKeys = Object.keys(requestContent)
 
-    const requiredKeys = modelKeys.filter(key => {
-      const optional = this.model[key].optional || false
-      return optional == false
-    })
-
-    const validateRequestKeys = requiredKeys.every(key => {
-      return requestKeys.includes(key)
-    })
+    const requestKeysValidationResult = this.validateRequiredKeys()
     
-    if(!validateRequestKeys) {
+    if(!requestKeysValidationResult) {
       return {
         message: 'Request don\'t obey to the model requirement.',
         valid: false
       }
     }
 
-    if(this.getLength(modelKeys) < this.getLength(requestKeys)) {
+    if(this.getLength(this.modelKeys) < this.getLength(this.requestKeys)) {
       return {
         message: 'Request has more properties then model.',
         valid: false
       }
     }
 
-    const validationObj = modelKeys.reduce((acc, key) => {
-      return {...acc, [key]: Object.keys(this.model[key])}
-    }, {} as stringKeyAccess)
+    const validationObj = this.createValidationObject()
+
+    let validationResult = {
+      message: 'Ok',
+      valid: true
+    }
 
     Object.keys(validationObj).forEach(key => {
+      const requestValue = requestContent[key]
+      const modelKey = this.model[key]
       validationObj[key].forEach((toValidate: string) => {
-        console.log(key, toValidate, toValidate in this)
+        if(toValidate in this) {
+          const result = this[toValidate](modelKey[toValidate], requestValue)
+          if(!result) {
+            validationResult = {
+              message: `Request didn't pass on ${toValidate} validation.`,
+              valid: result
+            }
+          }
+        }
       })
     })
 
-    return true
+    return validationResult
   }
 
-  private type(expected: string, value: any) {
-    return Array.isArray(value) ?
-      expected === 'array' :
-      expected === typeof value
+  private createValidationObject() {
+    return this.modelKeys.reduce((acc, key) => {
+      return {...acc, [key]: Object.keys(this.model[key])}
+    }, {} as stringKeyAccess)
   }
 
-  private getLength(value: number | string | [] | {}) {
+  private validateRequiredKeys() {
+    const requiredKeys = this.modelKeys.filter(key => {
+      const optional = this.model[key].optional || false
+      return optional == false
+    })
+
+    const requiredKeysValidation = requiredKeys.every(key => {
+      return this.requestKeys.includes(key)
+    })
+
+    return requiredKeysValidation
+  }
+
+  private getLength(value: number|string|[]|{}) {
     const methods: stringKeyAccess = {
       number(value: number) {
         return value.toString().length
@@ -61,15 +82,18 @@ class RequestValidator {
         return value.length
       },
       object(value: object | []) {
-        const isArray = Array.isArray(value)
-
-        return isArray ?
-          (value as []).length :
-          Object.keys(value).length
+        return Object.keys(value).length
       }
     }
 
-    return methods[typeof value](value)
+    const methodName = typeof value
+    return methodName in methods ? methods[methodName](value) : 0
+  }
+
+  private type(expected: string, value: any) {
+    return Array.isArray(value) ?
+      expected === 'array' :
+      expected === typeof value
   }
 
   private maxLength(limit: number, value: number|string|[]|{}) {
@@ -101,8 +125,13 @@ class RequestValidator {
     return expected === value
   }
 
-  private timeFormat(value: string) {
-    const regex = /([0-1][0-9]|2[0-4]):[0-5][0-9]/g
+  private timeFormat(pattern: string, value: string) {
+    const patterns: stringKeyAccess = {
+      'hh:mm': /([0-1][0-9]|2[0-4]):[0-5][0-9]/g,
+      'hh:mm:ss': /([0-1][0-9]|2[0-4]):[0-5][0-9]:[0-5][0-9]/g,
+    }
+
+    const regex = patterns[pattern]
     return RegExp(regex).test(value)
   }
 
