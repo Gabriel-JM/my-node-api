@@ -1,4 +1,4 @@
-import { stringKeyAccess } from "../types/interfaces"
+import { stringKeyAccess } from '../types/interfaces'
 
 class RequestValidator {
 
@@ -6,13 +6,11 @@ class RequestValidator {
   modelKeys: string[]
 
   constructor(private model: stringKeyAccess) {
-    this.modelKeys = Object.keys(this.model)
+    this.modelKeys = Object.keys(model)
   }
 
   validate(requestContent: stringKeyAccess) {
-    this.requestKeys = Object.keys(requestContent)
-
-    const requestKeysValidationResult = this.validateRequiredKeys()
+    const requestKeysValidationResult = this.validateRequiredKeys(requestContent)
     
     if(!requestKeysValidationResult) {
       return {
@@ -35,21 +33,30 @@ class RequestValidator {
       valid: true
     }
 
-    Object.keys(validationObj).forEach(key => {
+    for(const key in validationObj) {
       const requestValue = requestContent[key]
       const modelKey = this.model[key]
-      validationObj[key].forEach((toValidate: string) => {
-        if(toValidate in this) {
-          const result = this[toValidate](modelKey[toValidate], requestValue)
-          if(!result) {
+      const toValidateField = validationObj[key]
+
+      toValidateField.forEach((methodName: string) => {
+        const modelKeyValidation = modelKey[methodName]
+        if(methodName in this) {
+          const result = this[methodName](modelKeyValidation, requestValue)
+          const isntRequestValid = (
+            !result && (!modelKey.optional || 
+            modelKey.optional && requestValue)
+          )
+          
+          if(isntRequestValid) {
             validationResult = {
-              message: `Request didn't pass on ${toValidate} validation.`,
+              message: `Request didn't pass on ${key} field ${methodName} validation.`,
               valid: result
             }
           }
         }
       })
-    })
+      
+    }
 
     return validationResult
   }
@@ -60,7 +67,9 @@ class RequestValidator {
     }, {} as stringKeyAccess)
   }
 
-  private validateRequiredKeys() {
+  private validateRequiredKeys(requestContent: stringKeyAccess) {
+    this.requestKeys = Object.keys(requestContent)
+    
     const requiredKeys = this.modelKeys.filter(key => {
       const optional = this.model[key].optional || false
       return optional == false
@@ -117,6 +126,8 @@ class RequestValidator {
   }
 
   private valueBetween(valuesToCompare: number[], value: number) {
+    if(!Array.isArray(valuesToCompare)) return false
+
     const [minimum, maximum] = valuesToCompare
     return value >= minimum && value <= maximum
   }
@@ -126,13 +137,17 @@ class RequestValidator {
   }
 
   private timeFormat(pattern: string, value: string) {
+    if(typeof value !== 'string') return false
+
     const patterns: stringKeyAccess = {
-      'hh:mm': /([0-1][0-9]|2[0-4]):[0-5][0-9]/g,
-      'hh:mm:ss': /([0-1][0-9]|2[0-4]):[0-5][0-9]:[0-5][0-9]/g,
+      'hh:mm a': /(0[1-9]|1[0-2]):[0-5]\d\s(AM|PM)/g,
+      'hh:mm:ss a': /(0[1-9]|1[0-2]):[0-5]\d:[0-5]\d\s(AM|PM)/g,
+      'hh:mm': /([0-1]\d|2[0-4]):[0-5]\d/g,
+      'hh:mm:ss': /([0-1]\d|2[0-4]):[0-5]\d:[0-5]\d/g,
     }
 
     const regex = patterns[pattern]
-    return RegExp(regex).test(value)
+    return pattern in patterns && RegExp(regex).test(value)
   }
 
 }
