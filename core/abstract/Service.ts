@@ -1,14 +1,15 @@
 import Dolphin from '../../database/Dolphin'
 import { BodyContent } from '../types/interfaces'
+import { DeleteResult } from '../types/interfaces'
 
-export default abstract class Service { 
+export default abstract class Service<TYPE> { 
   protected dolphin: Dolphin
   
   constructor(protected tableName: string) {
     this.dolphin = new Dolphin(tableName)
   }
 
-  async getAll(): Promise<any> {
+  async getAll(): Promise<TYPE> {
     return await this.defaultGetAll()
   }
 
@@ -23,7 +24,7 @@ export default abstract class Service {
     }
   }
 
-  async getOne(id: number): Promise<any> {
+  async getOne(id: number): Promise<TYPE> {
     return await this.defaultGetOne(id)
   }
 
@@ -41,7 +42,7 @@ export default abstract class Service {
     }
   }
 
-  async postOne(contentBody: object): Promise<any> {
+  async postOne(contentBody: object): Promise<TYPE> {
     return await this.defaultPostOne(contentBody)
   }
 
@@ -58,7 +59,7 @@ export default abstract class Service {
     }
   }
 
-  async putOne(contentBody: BodyContent): Promise<any> {
+  async putOne(contentBody: BodyContent): Promise<TYPE> {
     return await this.defaultPutOne(contentBody as { id: number })
   }
 
@@ -78,7 +79,7 @@ export default abstract class Service {
     }
   }
 
-  async deleteOne(id: number): Promise<any> {
+  async deleteOne(id: number): Promise<DeleteResult> {
     return await this.defaultDeleteOne(id)
   }
 
@@ -101,7 +102,11 @@ export default abstract class Service {
       }
     } catch(err) {
       console.error(err)
-      return null
+      return {
+        message: 'Error on service delete',
+        objectId: 0,
+        ok: false
+      }
     }
   }
 

@@ -4,6 +4,10 @@ export interface ProductCategory {
 }
 
 export default {
+  id: {
+    type: 'number',
+    optional: true
+  },
   name: {
     type: 'string',
     maxLength: 80

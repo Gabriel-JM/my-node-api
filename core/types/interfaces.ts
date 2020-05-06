@@ -15,4 +15,10 @@ export interface stringKeyAccess {
   [key: string]: any
 }
 
+export interface DeleteResult {
+  message: string
+  objectId: number
+  ok: boolean
+}
+
 export type BodyContent = { id: number }

@@ -1,28 +1,30 @@
 import * as http from 'http'
 import { EventEmitter } from 'events'
-import { RequestContent, BodyContent } from '../types/interfaces'
+import { RequestContent, BodyContent, DeleteResult } from '../types/interfaces'
 import StringParser from '../StringParser/StringParser'
 import Service from './Service'
+import RequestValidator from '../RequestValidator/RequestValidator'
 
 const stringParser = new StringParser()
 const eventNames = ['get', 'post', 'put', 'delete', 'options']
 
-export default abstract class Controller extends EventEmitter {
+export default abstract class Controller<TYPE> extends EventEmitter {
   [key: string]: any
   protected event = ''
   protected res: http.ServerResponse
   protected req: http.IncomingMessage
+  protected requestValidator: RequestValidator
   protected headers = {
     'Content-Type': 'application/json'
   }
 
-  abstract postObject() : void
-
   constructor(
     protected content: RequestContent,
-    protected service: Service
+    protected service: Service<TYPE>,
+    protected requestModel: object
   ) {
     super()
+    this.requestValidator = new RequestValidator(requestModel)
     this.res = content.res
     this.req = content.req
     this.createEvents()
@@ -62,7 +64,7 @@ export default abstract class Controller extends EventEmitter {
 
   async get() {
     let { id = null } = this.content.query
-    let result: {} | []
+    let result: TYPE | TYPE[]
 
     if(id) {
       const numberId = Number(id)
@@ -79,10 +81,17 @@ export default abstract class Controller extends EventEmitter {
     const { body = null } = this.content
 
     if(body) {
-      const result = await this.service.postOne(body)
+      const validationResult = this.requestValidator.validate(body)
+      
+      if(validationResult.valid) {
+        const result = await this.service.postOne(body)
 
-      this.ok()
-      this.sendResponse(result)
+        this.ok()
+        this.sendResponse(result)
+      } else {
+        this.badRequest()
+        this.sendMessage(validationResult.message, false)
+      }
     }
 
     this.badRequest()
@@ -93,15 +102,22 @@ export default abstract class Controller extends EventEmitter {
     const { body = null } = this.content
 
     if(body && (body as BodyContent).id) {
-      const result = await this.service.putOne(body as BodyContent)
+      const validationResult = this.requestValidator.validate(body)
 
-      if(result) {
+      if(validationResult.valid) {
+        const result = await this.service.putOne(body as BodyContent)
+
+        if(result) {
+          this.badRequest()
+          this.sendMessage('Failed on update!', false)
+        }
+
+        this.ok()
+        this.sendResponse(result)
+      } else {
         this.badRequest()
-        this.sendMessage('Failed on update!', false)
+        this.sendMessage(validationResult.message, false)
       }
-
-      this.ok()
-      this.sendResponse(result)
     }
 
     this.badRequest()
@@ -112,9 +128,7 @@ export default abstract class Controller extends EventEmitter {
     const { id } = this.content.query
 
     if(id) {
-      const result = await this.service.deleteOne(
-          Number(id)
-      )
+      const result = await this.service.deleteOne(Number(id))
 
       result.ok ? this.ok() : this.notFound()
       this.sendResponse(result)
@@ -159,7 +173,7 @@ export default abstract class Controller extends EventEmitter {
     )
   }
 
-  sendResponse(responseContent: object) {
+  sendResponse(responseContent: TYPE | DeleteResult) {
     this.res.end(JSON.stringify(responseContent))
   }
 
