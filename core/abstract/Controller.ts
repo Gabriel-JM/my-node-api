@@ -69,9 +69,9 @@ export default abstract class Controller<TYPE> extends EventEmitter {
     if(id) {
       const numberId = Number(id)
       result = await this.service.getOne(numberId)
+    } else {
+      result = await this.service.getAll()
     }
-
-    result = await this.service.getAll()
 
     this.ok()
     this.sendResponse(result)
@@ -107,7 +107,7 @@ export default abstract class Controller<TYPE> extends EventEmitter {
       if(validationResult.valid) {
         const result = await this.service.putOne(body as BodyContent)
 
-        if(result) {
+        if(!result) {
           this.badRequest()
           this.sendMessage('Failed on update!', false)
         }
@@ -171,6 +171,10 @@ export default abstract class Controller<TYPE> extends EventEmitter {
     this.res.end(
       this.sendMessage('Method not allowed', false)
     )
+  }
+
+  contentType(type: string) {
+    this.res.writeHead(200, { 'Content-Type': type })
   }
 
   sendResponse(responseContent: TYPE | DeleteResult) {
