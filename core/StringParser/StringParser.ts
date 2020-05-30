@@ -1,3 +1,5 @@
+import { stringKeyAccess } from "@core/types/types-interfaces"
+
 export default class StringParser {
 
   private captalize(string: string) {
@@ -37,7 +39,7 @@ export default class StringParser {
   }
 
   pascalCaseToDashCase(text: string): string {
-    const match = text.match(/(?<=[a-z])[A-Z]/)
+    const match = text.match(/(?<=[a-z])[A-Z]/g)
 
     if(!match) return text.toLowerCase()
 
@@ -45,6 +47,48 @@ export default class StringParser {
     const newText = stringArray.join('-')
 
     return this.pascalCaseToDashCase(newText)
+  }
+
+  snakeCaseToCamelCase(text: string): string {
+    const match = text.match(/_/g)
+
+    if(!match) return text
+
+    let newText = ''
+
+    const stringArray = text.split('_')
+    stringArray.forEach((string, index) => {
+      if(!index) return newText += string
+
+      newText += this.captalize(string)
+    })
+
+    return this.snakeCaseToCamelCase(newText)
+  }
+
+  removeIdFromName(text: string) {
+    if(text.match(/_id/g)) {
+      return text.split('_id').shift() as string
+    }
+
+    return text
+  }
+
+  parseObjectAttributes(objToParse: stringKeyAccess) {
+    const keys = Object.keys(objToParse)
+    const objParsed: stringKeyAccess = {}
+
+    for(let keyName of keys) {
+      const isObj = typeof objToParse[keyName] === 'object'
+      const withoutIdString = this.removeIdFromName(keyName)
+      const camelCasekey = this.snakeCaseToCamelCase(withoutIdString)
+      
+      objParsed[camelCasekey] = isObj ?
+        this.parseObjectAttributes(objToParse[keyName]) :
+        objToParse[keyName]
+    }
+
+    return objParsed
   }
 
 }

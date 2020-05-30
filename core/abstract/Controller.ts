@@ -80,22 +80,28 @@ export default abstract class Controller<TYPE> extends EventEmitter {
   async post() {
     const { body = null } = this.content
 
-    if(body) {
-      const validationResult = this.requestValidator.validate(body)
+    if(!body) {
+      this.badRequest()
+      this.sendMessage('Request Body not found.', false)
+      return
+    }
+    
+    const validationResult = this.requestValidator.validate(body)
       
-      if(validationResult.valid) {
-        const result = await this.service.postOne(body)
+    if(!validationResult.valid) {
+      this.badRequest()
+      this.sendMessage(validationResult.message, false)
+      return
+    }
+    
+    const result = await this.service.postOne(body)
 
-        this.ok()
-        this.sendResponse(result)
-      } else {
-        this.badRequest()
-        this.sendMessage(validationResult.message, false)
-      }
+    if(!result) {
+      this.serverError()
     }
 
-    this.badRequest()
-    this.sendMessage('Request Body not found.', false)
+    this.ok()
+    this.sendResponse(result)
   }
 
   async put() {
@@ -164,6 +170,10 @@ export default abstract class Controller<TYPE> extends EventEmitter {
 
   notAllowed() {
     this.res.writeHead(405, this.headers)
+  }
+
+  serverError() {
+    this.res.writeHead(500, this.headers)
   }
 
   default() {

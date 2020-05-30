@@ -37,6 +37,7 @@ export default abstract class Service<TYPE> {
 
       return rows[0]
     } catch(err) {
+      
       console.error(err)
       return null
     }
@@ -51,8 +52,9 @@ export default abstract class Service<TYPE> {
       const {rows}: any = await this.dolphin.insert({
         values: Object.values(contentBody as object)
       })
+      console.log(rows)
 
-      return this.defaultGetOne(rows.insertId)
+      return this.defaultGetOne(await rows.insertId)
     } catch(err) {
       console.error(err)
       return null
