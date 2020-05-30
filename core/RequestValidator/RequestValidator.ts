@@ -1,4 +1,4 @@
-import { stringKeyAccess } from '../types/interfaces'
+import { stringKeyAccess } from '../types/types-interfaces'
 
 class RequestValidator {
 

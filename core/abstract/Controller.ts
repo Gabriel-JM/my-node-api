@@ -1,6 +1,6 @@
 import * as http from 'http'
 import { EventEmitter } from 'events'
-import { RequestContent, BodyContent, DeleteResult } from '../types/interfaces'
+import { RequestContent, BodyContent, DeleteResult } from '../types/types-interfaces'
 import StringParser from '../StringParser/StringParser'
 import Service from './Service'
 import RequestValidator from '../RequestValidator/RequestValidator'

@@ -14,7 +14,7 @@ export default function build(mainFolderPath: string) {
 
     return buildImports(dirs, controllers)
   } catch(error) {
-    console.log('\nbuild function: Folder not found\n\n', error)
+    console.log('\nImportsBuilder.ts -> build function: Folder not found\n\n', error)
     return {} as object
   }
 }

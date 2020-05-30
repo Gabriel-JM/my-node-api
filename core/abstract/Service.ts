@@ -1,6 +1,6 @@
 import Dolphin from '../../database/Dolphin'
-import { BodyContent } from '../types/interfaces'
-import { DeleteResult } from '../types/interfaces'
+import { BodyContent } from '../types/types-interfaces'
+import { DeleteResult } from '../types/types-interfaces'
 
 export default abstract class Service<TYPE> { 
   protected dolphin: Dolphin

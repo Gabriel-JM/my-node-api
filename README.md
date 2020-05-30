@@ -19,7 +19,7 @@ npm start
 ### Creating your paths
 
 1. The path creation is automatic.
-2. All paths code must be in `src` folder, must have a folder with the name of the path and a file to be the Controller Class.
+2. All paths code must be in `app/src` folder, must have a folder with the name of the path and a file to be the Controller Class.
 3. The name of the folder will be the path, for example:
     - Folder `Item` has path `/item`.
     - Folder `ItemCategory` has path `/item-category`.

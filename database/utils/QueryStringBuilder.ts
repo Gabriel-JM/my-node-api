@@ -1,4 +1,4 @@
-import { Join, whereValue, keyValuePair } from '../types/interfaces'
+import { Join, whereValue, keyValuePair } from '../types/types-interfaces'
 
 export default class QueryStringBuilder {
 

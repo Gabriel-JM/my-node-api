@@ -1,6 +1,11 @@
 import connection from './connection'
 import QueryBuilder from './utils/QueryStringBuilder'
-import { QueryObject, ValuesInsert, ValuesUpdate } from './types/interfaces'
+import {
+  QueryObject,
+  ValuesInsert,
+  ValuesUpdate,
+  DatabaseRowData
+} from './types/types-interfaces'
 
 export default class Dolphin {
 
@@ -70,11 +75,17 @@ export default class Dolphin {
     return this.execQuery(query, [id])
   }
 
+  private async verifyRelations(rows: DatabaseRowData) {
+    console.log(rows)
+
+    return rows
+  }
+
   private async execQuery(query: string, values: any[] = []) {
     try {
       const [rows, fields] = await this.conn.execute(query, values)
 
-      return { rows, fields }
+      return { rows: this.verifyRelations(rows), fields }
     } catch(err) {
       console.error(err)
       return null

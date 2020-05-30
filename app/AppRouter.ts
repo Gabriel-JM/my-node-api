@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { RequestContent, stringKeyAccess } from '../core/types/interfaces'
+import { RequestContent, stringKeyAccess } from '../core/types/types-interfaces'
 import ImportsBuilder from '../core/ImportsBuilder/ImportsBuilder'
 import { ServerResponse } from 'http'
 

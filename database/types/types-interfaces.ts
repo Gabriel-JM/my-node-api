@@ -1,6 +1,10 @@
+import { RowDataPacket, OkPacket } from "mysql2"
+
 export type whereValue = keyValuePair[]
 
 export type keyValuePair = [string, (string | number | boolean)]
+
+export type DatabaseRowData = RowDataPacket[] | RowDataPacket[][] | OkPacket | OkPacket[]
 
 export interface QueryObject {
   values?: string
