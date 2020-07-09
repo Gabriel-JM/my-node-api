@@ -94,7 +94,7 @@ export default class Dolphin {
     return stringParser.parseObjectAttributes(rows) as DatabaseRowData
   }
 
-  private async execQuery(query: string, values: any[] = []) {
+  private async execQuery(query: string, values: unknown[] = []) {
     try {
       const [rows, fields] = await this.conn.execute(query, values)
       const data = this.sanitazeResult(rows)

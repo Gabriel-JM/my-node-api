@@ -21,4 +21,9 @@ export interface DeleteResult {
   ok: boolean
 }
 
+export interface RepositoryResultError {
+  error: Error
+  method: string
+}
+
 export type BodyContent = { id: number }
