@@ -1,10 +1,10 @@
 import * as path from 'path'
-import { RequestContent, stringKeyAccess } from '../core/types/types-interfaces'
+import { RequestContent, StringKeyAccess } from '../core/types/types-interfaces'
 import ImportsBuilder from '../core/ImportsBuilder/ImportsBuilder'
 import { ServerResponse } from 'http'
 
 const srcPath = path.join(__dirname, 'src')
-const controllers: stringKeyAccess = ImportsBuilder(srcPath)
+const controllers: StringKeyAccess = ImportsBuilder(srcPath)
 
 export default function appRouter(content: RequestContent) {
   const { res, pathArray } = content
