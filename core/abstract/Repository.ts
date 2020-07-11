@@ -1,7 +1,5 @@
 import Dolphin from 'database/Dolphin'
-import { RepositoryResultError } from '@core/types/types-interfaces'
-
-type RepositoryResult<TYPE> = Promise<TYPE | RepositoryResultError>
+import { RepositoryResultError, RepositoryResult } from '@core/types/types-interfaces'
 
 export default class Repository<TYPE extends object> {
   protected dolphin: Dolphin
@@ -48,7 +46,7 @@ export default class Repository<TYPE extends object> {
     }
   }
 
-  async update(contentBody: { id: number }) {
+  async update(contentBody: { id: number }): RepositoryResult<TYPE> {
     try {
       const {rows}: any = await this.dolphin.update({
         values: contentBody as object,
@@ -56,7 +54,9 @@ export default class Repository<TYPE extends object> {
       })
 
       return (
-        rows.affectedRows ? this.findById(contentBody.id) : null
+        rows.affectedRows
+          ? this.findById(contentBody.id)
+          : this.resultError(new Error('Didn\'t affect any rows'), 'update')
       )
     } catch(err) {
       console.error(err)

@@ -21,6 +21,14 @@ export interface DeleteResult {
   ok: boolean
 }
 
+export type RepositoryResult<TYPE> = Promise<TYPE | RepositoryResultError | RepositoryDeleteResult>
+
+export interface RepositoryDeleteResult {
+  message: string
+  objectId: number
+  ok: boolean
+}
+
 export interface RepositoryResultError {
   error: Error
   method: string
