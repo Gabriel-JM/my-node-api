@@ -1,4 +1,4 @@
-import * as http from 'http'
+import http from 'http'
 import { ParsedUrlQuery } from 'querystring';
 
 export interface RequestContent {
@@ -11,7 +11,7 @@ export interface RequestContent {
   body: {} | BodyContent
 }
 
-export interface stringKeyAccess {
+export interface StringKeyAccess {
   [key: string]: any
 }
 

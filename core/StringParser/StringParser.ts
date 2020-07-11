@@ -1,4 +1,4 @@
-import { stringKeyAccess } from "@core/types/types-interfaces"
+import { StringKeyAccess } from "@core/types/types-interfaces"
 
 export default class StringParser {
 
@@ -74,9 +74,9 @@ export default class StringParser {
     return text
   }
 
-  parseObjectAttributes(objToParse: stringKeyAccess) {
+  parseObjectAttributes(objToParse: StringKeyAccess) {
     const keys = Object.keys(objToParse)
-    const objParsed: stringKeyAccess = {}
+    const objParsed: StringKeyAccess = {}
 
     for(let keyName of keys) {
       const isObj = typeof objToParse[keyName] === 'object'

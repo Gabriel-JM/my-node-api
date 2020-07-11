@@ -1,5 +1,5 @@
-import * as http from 'http'
-import * as Url from 'url'
+import http from 'http'
+import Url from 'url'
 import { RequestContent } from './types/types-interfaces'
 import appRouter from '../app/appRouter'
 

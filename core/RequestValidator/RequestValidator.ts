@@ -1,15 +1,15 @@
-import { stringKeyAccess } from '../types/types-interfaces'
+import { StringKeyAccess } from '../types/types-interfaces'
 
 class RequestValidator {
 
   [key: string]: any
   modelKeys: string[]
 
-  constructor(private model: stringKeyAccess) {
+  constructor(private model: StringKeyAccess) {
     this.modelKeys = Object.keys(model)
   }
 
-  validate(requestContent: stringKeyAccess) {
+  validate(requestContent: StringKeyAccess) {
     const requestKeysValidationResult = this.validateRequiredKeys(requestContent)
     
     if(!requestKeysValidationResult) {
@@ -64,10 +64,10 @@ class RequestValidator {
   private createValidationObject() {
     return this.modelKeys.reduce((acc, key) => {
       return {...acc, [key]: Object.keys(this.model[key])}
-    }, {} as stringKeyAccess)
+    }, {} as StringKeyAccess)
   }
 
-  private validateRequiredKeys(requestContent: stringKeyAccess) {
+  private validateRequiredKeys(requestContent: StringKeyAccess) {
     this.requestKeys = Object.keys(requestContent)
     
     const requiredKeys = this.modelKeys.filter(key => {
@@ -83,7 +83,7 @@ class RequestValidator {
   }
 
   private getLength(value: number|string|[]|{}) {
-    const methods: stringKeyAccess = {
+    const methods: StringKeyAccess = {
       number(value: number) {
         return value.toString().length
       },
@@ -139,7 +139,7 @@ class RequestValidator {
   private timeFormat(pattern: string, value: string) {
     if(typeof value !== 'string') return false
 
-    const patterns: stringKeyAccess = {
+    const patterns: StringKeyAccess = {
       'hh:mm a': /(0[1-9]|1[0-2]):[0-5]\d\s(AM|PM)/g,
       'hh:mm:ss a': /(0[1-9]|1[0-2]):[0-5]\d:[0-5]\d\s(AM|PM)/g,
       'hh:mm': /([0-1]\d|2[0-4]):[0-5]\d/g,
