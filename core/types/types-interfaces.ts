@@ -39,7 +39,12 @@ export type ServiceResult<TYPE> = TYPE | RepositoryResultError | RepositoryDelet
 
 export type MinimumBodyContent = { id: number }
 
-export interface ValidationPattern {
+export interface ValidationObject {
+  [key: string]: ValidationOptions
+}
+
+export interface ValidationOptions {
+  [key: string]: any
   type: string
   optional?: boolean
   length?: number

@@ -1,6 +1,6 @@
 import http from 'http'
 import { EventEmitter } from 'events'
-import { RequestContent, MinimumBodyContent, ServiceResult } from '../types/types-interfaces'
+import { RequestContent, MinimumBodyContent, ServiceResult, ValidationObject } from '../types/types-interfaces'
 import StringParser from '../StringParser/StringParser'
 import Service from './Service'
 import RequestValidator from '../RequestValidator/RequestValidator'
@@ -21,7 +21,7 @@ export default abstract class Controller<TYPE extends object> extends EventEmitt
   constructor(
     protected content: RequestContent,
     protected service: Service<TYPE>,
-    protected requestModel: object
+    protected requestModel: ValidationObject
   ) {
     super()
     this.requestValidator = new RequestValidator(requestModel)

@@ -1,3 +1,5 @@
+import { ValidationObject } from '@core/types/types-interfaces'
+
 export interface Product {
   name: string
   brand: string
@@ -6,7 +8,7 @@ export interface Product {
   productCategory: number
 }
 
-export default {
+export default <ValidationObject> {
   id: {
     type: 'number',
     optional: true

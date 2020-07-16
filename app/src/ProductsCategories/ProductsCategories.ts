@@ -1,9 +1,11 @@
+import { ValidationObject } from '@core/types/types-interfaces'
+
 export interface ProductCategory {
   name: string
   color: string
 }
 
-export default {
+export default <ValidationObject> {
   id: {
     type: 'number',
     optional: true

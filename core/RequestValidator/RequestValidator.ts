@@ -1,11 +1,11 @@
-import { StringKeyAccess } from '../types/types-interfaces'
+import { StringKeyAccess, ValidationObject, ValidationOptions } from '../types/types-interfaces'
 
 class RequestValidator {
 
   [key: string]: any
   modelKeys: string[]
 
-  constructor(private model: StringKeyAccess) {
+  constructor(private model: ValidationObject) {
     this.modelKeys = Object.keys(model)
   }
 
