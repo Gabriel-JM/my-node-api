@@ -1,6 +1,6 @@
 import Service from '../../../core/abstract/Service'
 import { ProductCategory } from './ProductsCategories'
-import ProductsRepository from './ProductsRepository'
+import ProductsRepository from './ProductsCategoriesRepository'
 
 const repository = new ProductsRepository()
 
