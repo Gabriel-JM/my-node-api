@@ -1,4 +1,4 @@
-import Dolphin from 'database/Dolphin'
+import Dolphin from '../../database/Dolphin'
 import { RepositoryResultError, RepositoryResult, MinimumBodyContent } from '@core/types/types-interfaces'
 
 export default class Repository<TYPE extends object> {
