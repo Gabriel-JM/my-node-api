@@ -38,3 +38,16 @@ export interface RepositoryResultError {
 export type ServiceResult<TYPE> = TYPE | RepositoryResultError | RepositoryDeleteResult
 
 export type MinimumBodyContent = { id: number }
+
+export interface ValidationPattern {
+  type: string
+  optional?: boolean
+  length?: number
+  maxLength?: number
+  minLength?: number
+  maxValue?: number
+  minValue?: number
+  valueBetween?: [number, number]
+  equalTo?: string | boolean | number
+  timeFormat?: 'hh:mm' | 'hh:mm:ss' | 'hh:mm a' | 'hh:mm:ss a'
+}
