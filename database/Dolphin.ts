@@ -97,7 +97,7 @@ export default class Dolphin {
   private async execQuery(query: string, values: unknown[] = []) {
     try {
       const [rows, fields] = await this.conn.execute(query, values)
-      const data = this.sanitazeResult(rows)
+      const data = await this.sanitazeResult(rows)
 
       return { rows: data, fields }
     } catch(err) {
