@@ -1,6 +1,6 @@
-import * as http from 'http'
+import http from 'http'
 import { EventEmitter } from 'events'
-import { RequestContent, BodyContent, DeleteResult } from '../types/types-interfaces'
+import { RequestContent, MinimumBodyContent, ServiceResult } from '../types/types-interfaces'
 import StringParser from '../StringParser/StringParser'
 import Service from './Service'
 import RequestValidator from '../RequestValidator/RequestValidator'
@@ -8,7 +8,7 @@ import RequestValidator from '../RequestValidator/RequestValidator'
 const stringParser = new StringParser()
 const eventNames = ['get', 'post', 'put', 'delete', 'options']
 
-export default abstract class Controller<TYPE> extends EventEmitter {
+export default abstract class Controller<TYPE extends object> extends EventEmitter {
   [key: string]: any
   protected event = ''
   protected res: http.ServerResponse
@@ -64,13 +64,13 @@ export default abstract class Controller<TYPE> extends EventEmitter {
 
   async get() {
     let { id = null } = this.content.query
-    let result: TYPE | TYPE[]
+    let result: ServiceResult<TYPE>
 
     if(id) {
       const numberId = Number(id)
-      result = await this.service.getOne(numberId)
+      result = await this.service.findById(numberId)
     } else {
-      result = await this.service.getAll()
+      result = await this.service.findAll()
     }
 
     this.ok()
@@ -94,7 +94,7 @@ export default abstract class Controller<TYPE> extends EventEmitter {
       return
     }
     
-    const result = await this.service.postOne(body)
+    const result = await this.service.create(body as TYPE)
 
     if(!result) {
       this.serverError()
@@ -107,11 +107,11 @@ export default abstract class Controller<TYPE> extends EventEmitter {
   async put() {
     const { body = null } = this.content
 
-    if(body && (body as BodyContent).id) {
+    if(body && (body as MinimumBodyContent).id) {
       const validationResult = this.requestValidator.validate(body)
 
       if(validationResult.valid) {
-        const result = await this.service.putOne(body as BodyContent)
+        const result = await this.service.update(body as TYPE)
 
         if(!result) {
           this.badRequest()
@@ -134,7 +134,7 @@ export default abstract class Controller<TYPE> extends EventEmitter {
     const { id } = this.content.query
 
     if(id) {
-      const result = await this.service.deleteOne(Number(id))
+      const result = await this.service.destroy(Number(id))
 
       result.ok ? this.ok() : this.notFound()
       this.sendResponse(result)
@@ -187,7 +187,7 @@ export default abstract class Controller<TYPE> extends EventEmitter {
     this.res.writeHead(200, { 'Content-Type': type })
   }
 
-  sendResponse(responseContent: TYPE | DeleteResult) {
+  sendResponse(responseContent: ServiceResult<TYPE>) {
     this.res.end(JSON.stringify(responseContent))
   }
 

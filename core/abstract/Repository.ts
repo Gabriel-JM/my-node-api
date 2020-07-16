@@ -1,5 +1,5 @@
 import Dolphin from 'database/Dolphin'
-import { RepositoryResultError, RepositoryResult } from '@core/types/types-interfaces'
+import { RepositoryResultError, RepositoryResult, MinimumBodyContent } from '@core/types/types-interfaces'
 
 export default class Repository<TYPE extends object> {
   protected dolphin: Dolphin
@@ -33,7 +33,7 @@ export default class Repository<TYPE extends object> {
     }
   }
 
-  async create(contentBody: object): RepositoryResult<TYPE> {
+  async create(contentBody: TYPE): RepositoryResult<TYPE> {
     try {
       const {rows}: any = await this.dolphin.insert({
         values: Object.values(contentBody as object)
@@ -46,16 +46,16 @@ export default class Repository<TYPE extends object> {
     }
   }
 
-  async update(contentBody: { id: number }): RepositoryResult<TYPE> {
+  async update(contentBody: TYPE): RepositoryResult<TYPE> {
     try {
       const {rows}: any = await this.dolphin.update({
         values: contentBody as object,
-        where: ['id', contentBody.id]
+        where: ['id', (contentBody as MinimumBodyContent).id]
       })
 
       return (
         rows.affectedRows
-          ? this.findById(contentBody.id)
+          ? this.findById((contentBody as MinimumBodyContent).id)
           : this.resultError(new Error('Didn\'t affect any rows'), 'update')
       )
     } catch(err) {
@@ -89,6 +89,6 @@ export default class Repository<TYPE extends object> {
   }
 
   private resultError(error: Error, method: string) {
-    return <RepositoryResultError> { error, method }
+    return <RepositoryResultError> { error, method, ok: false }
   }
 }

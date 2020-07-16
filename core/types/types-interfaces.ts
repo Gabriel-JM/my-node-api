@@ -8,7 +8,7 @@ export interface RequestContent {
   query: ParsedUrlQuery
   pathname: string | null
   pathArray: string[]
-  body: {} | BodyContent
+  body: {} | MinimumBodyContent
 }
 
 export interface StringKeyAccess {
@@ -32,6 +32,9 @@ export interface RepositoryDeleteResult {
 export interface RepositoryResultError {
   error: Error
   method: string
+  ok: boolean
 }
 
-export type BodyContent = { id: number }
+export type ServiceResult<TYPE> = TYPE | RepositoryResultError | RepositoryDeleteResult
+
+export type MinimumBodyContent = { id: number }
