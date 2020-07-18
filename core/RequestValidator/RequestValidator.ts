@@ -1,4 +1,6 @@
-import { StringKeyAccess, ValidationObject, ValidationOptions } from '../types/types-interfaces'
+import { StringKeyAccess, ValidationObject } from '../types/types-interfaces'
+
+type MeasurableTypes = string | number | [] | {}
 
 class RequestValidator {
 
@@ -82,7 +84,7 @@ class RequestValidator {
     return requiredKeysValidation
   }
 
-  private getLength(value: number|string|[]|{}) {
+  private getLength(value: MeasurableTypes) {
     const methods: StringKeyAccess = {
       number(value: number) {
         return value.toString().length
@@ -99,44 +101,78 @@ class RequestValidator {
     return methodName in methods ? methods[methodName](value) : 0
   }
 
-  private type(expected: string, value: any) {
+  type(expected: string, value: any) {
     return Array.isArray(value) ?
       expected === 'array' :
       expected === typeof value
   }
 
-  private maxLength(limit: number, value: number|string|[]|{}) {
+  maxLength(limit: number, value: MeasurableTypes) {
     return this.getLength(value) <= limit
   }
 
-  private minLength(minimum: number, value: number|string|[]|{}) {
+  minLength(minimum: number, value: MeasurableTypes) {
     return this.getLength(value) >= minimum
   }
 
-  private length(expected: number, value: number|string|[]|{}) {
+  length(expected: number, value: MeasurableTypes) {
     return this.getLength(value) === expected
   }
 
-  private maxValue(limit: number, value: number) {
+  lengthBetween(expectedValues: [number, number], value: MeasurableTypes) {
+    const [minimum, maximum] = expectedValues
+    return this.minLength(minimum, value) && this.maxLength(maximum, value)
+  }
+
+  maxValue(limit: number, value: number) {
     return value <= limit
   }
 
-  private minValue(minimum: number, value: number) {
+  minValue(minimum: number, value: number) {
     return value >= minimum
   }
 
-  private valueBetween(valuesToCompare: number[], value: number) {
+  valueBetween(valuesToCompare: [number, number], value: number) {
     if(!Array.isArray(valuesToCompare)) return false
 
     const [minimum, maximum] = valuesToCompare
     return value >= minimum && value <= maximum
   }
 
-  private equalTo(expected: number|string|boolean, value: number|string|boolean) {
+  maxDecimalLength(lengthValues: [number, number], value: number) {
+    const [maxBeforeDot, maxAfterDot] = lengthValues
+    const [beforeDot, afterDot = 0] = value.toString().split('.')
+    return (
+      this.maxLength(maxBeforeDot, +beforeDot) && this.maxLength(maxAfterDot, +afterDot)
+    )
+  }
+
+  minDecimalLength(lengthValues: [number, number], value: number) {
+    const [minBeforeDot, minAfterDot] = lengthValues
+    const [beforeDot, afterDot = 0] = value.toString().split('.')
+    return (
+      this.minLength(minBeforeDot, +beforeDot) && this.minLength(minAfterDot, +afterDot)
+    )
+  }
+
+  decimalLength(lengthValues: [number, number], value: number) {
+    const [lengthBeforeDot, lengthAfterDot] = lengthValues
+    const [beforeDot, afterDot = 0] = value.toString().split('.')
+    return (
+      this.length(lengthBeforeDot, +beforeDot) && this.length(lengthAfterDot, +afterDot)
+    )
+  }
+
+  equalTo(expected: number|string|boolean, value: number|string|boolean) {
     return expected === value
   }
 
-  private timeFormat(pattern: string, value: string) {
+  regExpMatch(expected: string | RegExp, value: string | number) {
+    const matchResult = RegExp(expected).exec(value.toString())
+    return Boolean(matchResult)
+  }
+
+  timeFormat(pattern: string, value: string) {
     if(typeof value !== 'string') return false
 
     const patterns: StringKeyAccess = {
@@ -147,7 +183,37 @@ class RequestValidator {
     }
 
     const regex = patterns[pattern]
-    return pattern in patterns && RegExp(regex).test(value)
+    const matchResult = RegExp(regex).exec(value)
+    const isInputEqualMatch = matchResult && matchResult[0] === matchResult.input
+
+    return pattern in patterns && isInputEqualMatch
+  }
+
+  dateFormat(pattern: string, value: string) {
+    if(typeof value !== 'string') return false
+
+    const days = /(0[1-9]|[1-2][0-9]|3[0-1])/
+    const months = /(0[1-9]|1[0-2])/
+    const years2digits = /\d{2}/
+    const years4digits = /\d{4}/
+
+    const patterns: StringKeyAccess = {
+      'dd/mm/yyyy': RegExp(`${days}\/${months}\/${years4digits}`),
+      'dd/mm/yy': RegExp(`${days}\/${months}\/${years2digits}`),
+      'mm/dd/yyyy': RegExp(`${months}\/${days}\/${years4digits}`),
+      'mm/dd/yy': RegExp(`${months}\/${days}\/${years2digits}`),
+      'dd-mm-yyyy': RegExp(`${days}-${months}-${years4digits}`),
+      'dd-mm-yy': RegExp(`${days}-${months}-${years2digits}`),
+      'mm-dd-yyyy': RegExp(`${months}-${days}-${years4digits}`),
+      'mm-dd-yy': RegExp(`${months}-${days}-${years2digits}`),
+      'yyyy-mm-dd': RegExp(`${years4digits}-${months}-${days}`)
+    }
+
+    const regex = patterns[pattern]
+    const matchResult = RegExp(regex).exec(value)
+    const isInputEqualMatch = matchResult && matchResult[0] === matchResult.input
+
+    return pattern in patterns && isInputEqualMatch
   }
 
 }

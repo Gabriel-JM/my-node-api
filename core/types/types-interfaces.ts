@@ -50,6 +50,10 @@ export interface ValidationOptions {
   length?: number
   maxLength?: number
   minLength?: number
+  lengthBetween?: [number, number]
+  maxDecimalLength?: [number, number]
+  minDecimalLength?: [number, number]
+  decimalLength?: [number, number]
   maxValue?: number
   minValue?: number
   valueBetween?: [number, number]
