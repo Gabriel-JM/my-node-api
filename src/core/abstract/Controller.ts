@@ -73,6 +73,11 @@ export default abstract class Controller<TYPE extends object> extends EventEmitt
       result = await this.service.findAll()
     }
 
+    if(!result) {
+      this.badRequest()
+      this.sendMessage('Failed on get result.', false)
+    }
+
     this.ok()
     this.sendResponse(result)
   }
@@ -98,6 +103,7 @@ export default abstract class Controller<TYPE extends object> extends EventEmitt
 
     if(!result) {
       this.serverError()
+      this.sendMessage('Failed on create.', false)
     }
 
     this.ok()
@@ -115,7 +121,7 @@ export default abstract class Controller<TYPE extends object> extends EventEmitt
 
         if(!result) {
           this.badRequest()
-          this.sendMessage('Failed on update!', false)
+          this.sendMessage('Failed on update.', false)
         }
 
         this.ok()
