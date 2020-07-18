@@ -1,4 +1,4 @@
-import { StringKeyAccess } from "src/app/Products/node_modules/@core/types/types-interfaces"
+import { StringKeyAccess } from '../types/types-interfaces'
 
 export default class StringParser {
 
