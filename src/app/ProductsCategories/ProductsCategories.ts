@@ -1,4 +1,4 @@
-import { ValidationObject } from '@core/types/types-interfaces'
+import { ValidationObject } from '../../../core/types/types-interfaces'
 
 export interface ProductCategory {
   name: string

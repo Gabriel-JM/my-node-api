@@ -1,7 +1,7 @@
 import http from 'http'
 import Url from 'url'
 import { RequestContent } from './types/types-interfaces'
-import appRouter from '../app/appRouter'
+import appRouter from '../router/appRouter'
 
 function getBodyContent(req : http.IncomingMessage): Promise<object | null> {
   return new Promise((resolve, reject) => {

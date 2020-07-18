@@ -1,4 +1,4 @@
-import Service from '../../../core/abstract/Service'
+import Service from '../../core/abstract/Service'
 import { Product } from './Product'
 import ProductsRepository from './ProductsRepository'
 
