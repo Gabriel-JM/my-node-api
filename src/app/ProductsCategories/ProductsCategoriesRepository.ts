@@ -1,4 +1,4 @@
-import Repository from '../../../core/abstract/Repository'
+import Repository from '../../core/abstract/Repository'
 import { ProductCategory } from './ProductsCategories'
 
 class ProductsRepository extends Repository<ProductCategory> {

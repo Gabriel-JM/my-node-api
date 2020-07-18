@@ -1,7 +1,7 @@
-import Controller from '../../../core/abstract/Controller'
+import Controller from '../../core/abstract/Controller'
 import ProductsCategoriesService from './ProductsCategoriesService'
 import ProductsCategoriesModel, { ProductCategory } from './ProductsCategories'
-import { RequestContent } from '../../../core/types/types-interfaces'
+import { RequestContent } from '../../core/types/types-interfaces'
 
 const service = new ProductsCategoriesService()
 
