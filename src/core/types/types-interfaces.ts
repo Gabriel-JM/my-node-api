@@ -30,7 +30,7 @@ export interface RepositoryDeleteResult {
 }
 
 export interface RepositoryResultError {
-  error: Error
+  error: string
   method: string
   ok: boolean
 }

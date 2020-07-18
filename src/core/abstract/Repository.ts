@@ -1,5 +1,5 @@
 import Dolphin from '../../database/Dolphin'
-import { RepositoryResultError, RepositoryResult, MinimumBodyContent } from 'src/app/Products/node_modules/@core/types/types-interfaces'
+import { RepositoryResultError, RepositoryResult, MinimumBodyContent } from '../types/types-interfaces'
 
 export default class Repository<TYPE extends object> {
   protected dolphin: Dolphin
@@ -89,6 +89,6 @@ export default class Repository<TYPE extends object> {
   }
 
   private resultError(error: Error, method: string) {
-    return <RepositoryResultError> { error, method, ok: false }
+    return <RepositoryResultError> { error: error.message, method, ok: false }
   }
 }
