@@ -3,7 +3,7 @@ import { RequestContent, StringKeyAccess } from '../core/types/types-interfaces'
 import ImportsBuilder from '../core/ImportsBuilder/ImportsBuilder'
 import { ServerResponse } from 'http'
 
-const srcPath = path.join(__dirname, 'src')
+const srcPath = path.join(__dirname, '..', 'app')
 const controllers: StringKeyAccess = ImportsBuilder(srcPath)
 
 export default function appRouter(content: RequestContent) {
